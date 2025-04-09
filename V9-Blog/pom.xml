@@ -23,7 +23,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.bobby.rpc.v9.starter</groupId>
+            <groupId>com.bobby.rpc</groupId>
             <artifactId>V9-Starter</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
