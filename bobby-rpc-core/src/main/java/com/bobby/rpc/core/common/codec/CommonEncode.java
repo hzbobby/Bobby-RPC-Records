@@ -3,6 +3,7 @@ package com.bobby.rpc.core.common.codec;
 import com.bobby.rpc.core.common.RpcRequest;
 import com.bobby.rpc.core.common.RpcResponse;
 import com.bobby.rpc.core.common.codec.serializer.ISerializer;
+import com.bobby.rpc.core.common.constants.BRpcConstants;
 import com.bobby.rpc.core.common.enums.MessageType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -41,6 +42,9 @@ public class CommonEncode extends MessageToByteEncoder {
 //        out.writeBytes(traceBytes);
 
 
+        // 增加魔数机制
+        writeMagicNumber(out);
+
         // 写入消息类型
         if(msg instanceof RpcRequest){
             out.writeShort(MessageType.REQUEST.getCode());
@@ -56,5 +60,13 @@ public class CommonEncode extends MessageToByteEncoder {
         out.writeInt(serialize.length);
         // 写入序列化字节数组
         out.writeBytes(serialize);
+    }
+
+    private void writeMagicNumber(ByteBuf out){
+        // 0x42: B
+        // 0x52: R
+        // 0x50: P
+        // 0x43: C
+        out.writeInt(BRpcConstants.MAGIC_NUMBER);
     }
 }

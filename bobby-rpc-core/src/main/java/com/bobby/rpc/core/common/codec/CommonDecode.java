@@ -1,6 +1,7 @@
 package com.bobby.rpc.core.common.codec;
 
 import com.bobby.rpc.core.common.codec.serializer.ISerializer;
+import com.bobby.rpc.core.common.constants.BRpcConstants;
 import com.bobby.rpc.core.common.enums.MessageType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,6 +30,15 @@ public class CommonDecode extends ByteToMessageDecoder {
 //        serializeTraceMsg(traceBytes);
 
 
+        // 读取魔数
+        int magicNumber = readMagicNumber(in);
+        log.debug("MyDecode$decode magicNumber: 0x{}", Integer.toHexString(magicNumber));
+        if(magicNumber!= BRpcConstants.MAGIC_NUMBER){
+            log.error("非法数据包: 魔数不匹配, 实际: 0x{}, 预期: 0x5250434D",
+                    Integer.toHexString(magicNumber));
+            throw new RuntimeException(String.format("Invalid Magic Number: 0x{}", Integer.toHexString(magicNumber)));
+        }
+
         // 1. 读取消息类型
         short messageType = in.readShort();
         // 现在还只支持request与response请求
@@ -51,6 +61,11 @@ public class CommonDecode extends ByteToMessageDecoder {
         Object deserialize = serializer.deserialize(bytes, messageType);
         out.add(deserialize);
     }
+
+    private int readMagicNumber(ByteBuf in) {
+        return in.readInt();    // 我们魔术是定义 4 个字节
+    }
+
 //
 //    private void serializeTraceMsg(byte[] traceByte){
 //        String traceMsg=new String(traceByte);

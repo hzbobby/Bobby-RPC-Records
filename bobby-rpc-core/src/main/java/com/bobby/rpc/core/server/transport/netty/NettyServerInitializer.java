@@ -7,6 +7,7 @@ import com.bobby.rpc.core.server.provider.ServiceProvider;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -38,8 +39,6 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
 //                return Class.forName(className);
 //            }
 //        }));
-
-
 
         // 使用自定义的编解码器
         pipeline.addLast(new CommonDecode());
