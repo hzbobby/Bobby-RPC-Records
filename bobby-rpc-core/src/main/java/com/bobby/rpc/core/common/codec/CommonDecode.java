@@ -62,6 +62,10 @@ public class CommonDecode extends ByteToMessageDecoder {
         out.add(deserialize);
     }
 
+    private Object decode(ChannelHandlerContext ctx, ByteBuf in){
+        return null;
+    }
+
     private int readMagicNumber(ByteBuf in) {
         return in.readInt();    // 我们魔术是定义 4 个字节
     }
