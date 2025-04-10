@@ -1,7 +1,7 @@
 package com.bobby.rpc.core.client.transport.netty;
 
-import com.bobby.rpc.core.common.codec.CommonDecode;
-import com.bobby.rpc.core.common.codec.CommonEncode;
+import com.bobby.rpc.core.common.codec.CommonDecoder;
+import com.bobby.rpc.core.common.codec.CommonEncoder;
 import com.bobby.rpc.core.common.codec.serializer.ISerializer;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -35,9 +35,9 @@ public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
 
 
         // 使用自定义的编解码器
-        pipeline.addLast(new CommonDecode());
+        pipeline.addLast(new CommonDecoder());
         // 编码需要传入序列化器，这里是json，还支持ObjectSerializer，也可以自己实现其他的
-        pipeline.addLast(new CommonEncode(ISerializer.getSerializerByCode(ISerializer.SerializerType.JSON.getCode())));
+        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.JSON.getCode())));
 //        pipeline.addLast(new CommonEncode(SerializerSpiLoader.getInstance(serializer)));
 
         pipeline.addLast(new NettyClientHandler());
