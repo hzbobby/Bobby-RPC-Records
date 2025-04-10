@@ -1,6 +1,6 @@
-package com.bobby.rpc.v9.user.controller;
+package com.bobby.user.controller;
 
-import com.bobby.rpc.v9.sample.service.IUserService;
+import com.bobby.rpc.core.sample.service.IUserService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

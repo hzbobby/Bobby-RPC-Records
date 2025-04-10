@@ -1,6 +1,6 @@
-package com.bobby.rpc.v9.user;
+package com.bobby.user;
 
-import com.bobby.rpc.v9.starter.common.annotation.EnableBRpc;
+import com.bobby.rpc.starter.annotation.EnableBRpc;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

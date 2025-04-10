@@ -1,11 +1,11 @@
-package com.bobby.rpc.v9.user.service.impl;
+package com.bobby.user.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
-import com.bobby.rpc.v9.common.annotation.RpcReference;
-import com.bobby.rpc.v9.sample.domain.Blog;
-import com.bobby.rpc.v9.sample.domain.User;
-import com.bobby.rpc.v9.sample.service.IBlogService;
-import com.bobby.rpc.v9.sample.service.IUserService;
+import com.bobby.rpc.core.common.annotation.RpcReference;
+import com.bobby.rpc.core.sample.domain.Blog;
+import com.bobby.rpc.core.sample.domain.User;
+import com.bobby.rpc.core.sample.service.IBlogService;
+import com.bobby.rpc.core.sample.service.IUserService;
 import org.springframework.stereotype.Service;
 
 @Service
