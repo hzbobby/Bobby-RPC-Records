@@ -23,7 +23,7 @@ public class RpcRequest implements Serializable {
     // v6. 包类型
     private RequestType type;
 
-    public RpcRequest(){
+    public RpcRequest() {
         type = RequestType.NORMAL;
     }
 
@@ -39,8 +39,18 @@ public class RpcRequest implements Serializable {
         HEARTBEAT(1),
         ;
         private final int code;
-        RequestType(int code){
+
+        RequestType(int code) {
             this.code = code;
+        }
+
+        public static RequestType fromCode(int code) {
+            for (RequestType type : values()) {
+                if (type.code == code) {
+                    return type;
+                }
+            }
+            return null;
         }
     }
 }

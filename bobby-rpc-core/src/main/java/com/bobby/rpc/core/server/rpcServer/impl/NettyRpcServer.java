@@ -26,6 +26,7 @@ public class NettyRpcServer implements IRpcServer {
         // netty 服务线程组boss负责建立连接， work负责具体的请求
         NioEventLoopGroup bossGroup = new NioEventLoopGroup();
         NioEventLoopGroup workGroup = new NioEventLoopGroup();
+
         // 启动netty服务器
         ServerBootstrap serverBootstrap = new ServerBootstrap();
 
@@ -34,18 +35,6 @@ public class NettyRpcServer implements IRpcServer {
                 .group(bossGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(nettyServerInitializer);
-
-//        try {
-//            // 同步阻塞
-//            channelFuture = serverBootstrap.bind(port).sync();
-//            // 死循环监听
-//            channelFuture.channel().closeFuture().sync();
-//
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } finally {
-//            shutdown(bossGroup, workGroup);
-//        }
 
         channelFuture = serverBootstrap.bind(port);
         channelFuture.addListener((ChannelFuture future) -> {

@@ -37,7 +37,7 @@ public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
         // 使用自定义的编解码器
         pipeline.addLast(new CommonDecoder());
         // 编码需要传入序列化器，这里是json，还支持ObjectSerializer，也可以自己实现其他的
-        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.JSON.getCode())));
+        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.PROTOBUF.getCode())));
 //        pipeline.addLast(new CommonEncode(SerializerSpiLoader.getInstance(serializer)));
 
         pipeline.addLast(new NettyClientHandler());

@@ -32,10 +32,14 @@ public interface ISerializer {
         ISerializer iSerializer = serializerMap.get(code);
         if (iSerializer == null) {
             // 尝试创建
-            if(code == SerializerType.JDK.getCode()) {
+            if (code == SerializerType.JDK.getCode()) {
                 serializerMap.put(code, new ObjectSerializer());
-            }else if(code == SerializerType.JSON.getCode()) {
+            } else if (code == SerializerType.JSON.getCode()) {
                 serializerMap.put(code, new JacksonSerializer());
+            } else if (code == SerializerType.KRYO.getCode()) {
+                serializerMap.put(code, new KryoSerializer());
+            }else if (code == SerializerType.PROTOBUF.getCode()) {
+                serializerMap.put(code, new ProtobufSerializer());
             }
             iSerializer = serializerMap.get(code);
             if (iSerializer == null) {
@@ -52,7 +56,7 @@ public interface ISerializer {
     static void registerSerializer(int code, ISerializer serializer, boolean replace) {
         if (replace) {
             serializerMap.put(code, serializer);
-        }else{
+        } else {
             serializerMap.putIfAbsent(code, serializer);
         }
     }
@@ -64,13 +68,15 @@ public interface ISerializer {
     public static enum SerializerType {
         JDK(0),
         JSON(1),
-        KRYO(2)
-        ;
+        KRYO(2),
+        PROTOBUF(3);
 
         private final int code;
+
         SerializerType(int code) {
             this.code = code;
         }
+
         public int getCode() {
             return code;
         }

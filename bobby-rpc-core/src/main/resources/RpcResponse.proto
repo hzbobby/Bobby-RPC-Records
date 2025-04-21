@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_multiple_files = false; // 是否为 message 生成多个 java 对象
+option java_package = "com.bobby.rpc.core.common.protobuf";  // java 包地址
+option java_outer_classname = "RpcResponseProto";   // 生成的 java 对象名
+
+message RpcResponse {
+  int32 code = 1;
+  string message = 2;
+  bytes data = 3;
+  string dataType = 4;
+}

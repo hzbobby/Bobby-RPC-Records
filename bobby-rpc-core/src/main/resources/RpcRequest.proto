@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_multiple_files = false; // 是否为 message 生成多个 java 对象
+option java_package = "com.bobby.rpc.core.common.protobuf";  // java 包地址
+option java_outer_classname = "RpcRequestProto";   // 生成的 java 对象名
+
+message RpcRequest {
+  string interface_name = 1;
+  string method_name = 2;
+  repeated bytes params = 3;  // 参数值序列化后的字节数组
+  repeated string params_types = 4;  // 参数类型的全限定类名
+  RequestType type = 5;
+
+  enum RequestType {
+    NORMAL = 0;
+    HEARTBEAT = 1;
+  }
+}
