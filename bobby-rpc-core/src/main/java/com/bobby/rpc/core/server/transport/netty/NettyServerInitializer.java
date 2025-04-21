@@ -15,9 +15,18 @@ import java.util.concurrent.TimeUnit;
  * 初始化，主要负责序列化的编码解码， 需要解决netty的粘包问题
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
+
+    private final String serializerTypeName;
+
     private final ServiceProvider serviceProvider;
 
     public NettyServerInitializer(ServiceProvider serviceProvider) {
+        this.serializerTypeName = ISerializer.SerializerType.JSON.name();
+        this.serviceProvider = serviceProvider;
+    }
+
+    public NettyServerInitializer(ServiceProvider serviceProvider, String serializerTypeName) {
+        this.serializerTypeName = serializerTypeName.toUpperCase();
         this.serviceProvider = serviceProvider;
     }
 
@@ -42,7 +51,8 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
         // 使用自定义的编解码器
         pipeline.addLast(new CommonDecoder());
         // 编码需要传入序列化器，这里是json，还支持ObjectSerializer，也可以自己实现其他的
-        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.PROTOBUF.getCode())));
+//        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.PROTOBUF.getCode())));
+        pipeline.addLast(new CommonEncoder(ISerializer.getSerializer(ISerializer.SerializerType.valueOf(serializerTypeName))));
 //        // 通过 SPI 机制 + 配置项 来指定使用的 序列化方式
 //        // 我们就可以通过配置项来动态修改 ISerializer 实现类。而且，新增序列化机制，也不需要修改 ISerializer
 //        pipeline.addLast(new CommonEncode(SerializerSpiLoader.getInstance(serializer)));

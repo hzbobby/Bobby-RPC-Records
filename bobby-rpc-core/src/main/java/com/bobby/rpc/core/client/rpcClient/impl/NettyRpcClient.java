@@ -21,23 +21,27 @@ import java.net.InetSocketAddress;
  */
 @Slf4j
 public class NettyRpcClient implements IRpcClient {
-    private static final Bootstrap bootstrap;
-    private static final EventLoopGroup eventLoopGroup;
-    private static final NettyClientInitializer nettyClientInitializer;
+    private final Bootstrap bootstrap;
+    private final EventLoopGroup eventLoopGroup;
 
     // 通过注入
     private final IServiceDiscover serviceDiscover;
 
-    // netty客户端初始化，重复使用
-    static {
-        nettyClientInitializer = new NettyClientInitializer();
+    // Bean 创建也是单例
+//    // netty客户端初始化，重复使用
+//    static {
+//        nettyClientInitializer = new NettyClientInitializer();
+//        eventLoopGroup = new NioEventLoopGroup();
+//        bootstrap = new Bootstrap();
+//        bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class)
+//                .handler(nettyClientInitializer);
+//    }
+
+    public NettyRpcClient(IServiceDiscover serviceDiscover, String serializerTypeName) {
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap = new Bootstrap();
         bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class)
-                .handler(nettyClientInitializer);
-    }
-
-    public NettyRpcClient(IServiceDiscover serviceDiscover) {
+                .handler(new NettyClientInitializer(serializerTypeName));
         this.serviceDiscover = serviceDiscover;
     }
 
@@ -76,11 +80,11 @@ public class NettyRpcClient implements IRpcClient {
     @Override
     public void close() {
         // 关闭 netty
-        if(eventLoopGroup != null) {
+        if (eventLoopGroup != null) {
             eventLoopGroup.shutdownGracefully().addListener(future -> {
                 if (future.isSuccess()) {
                     log.info("关闭 Netty 成功");
-                }else{
+                } else {
                     log.info("关闭 Netty 失败");
                 }
             });

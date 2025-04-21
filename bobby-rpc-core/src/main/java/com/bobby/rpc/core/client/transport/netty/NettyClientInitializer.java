@@ -14,6 +14,16 @@ import java.util.concurrent.TimeUnit;
  * 通过 handler 获取客户端的结果
  */
 public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
+    private final String serializerTypeName;
+
+    public NettyClientInitializer() {
+        this.serializerTypeName = ISerializer.SerializerType.JSON.name();
+    }
+
+    public NettyClientInitializer(String serializerTypeName) {
+        this.serializerTypeName = serializerTypeName.toUpperCase();
+    }
+
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
@@ -37,7 +47,8 @@ public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
         // 使用自定义的编解码器
         pipeline.addLast(new CommonDecoder());
         // 编码需要传入序列化器，这里是json，还支持ObjectSerializer，也可以自己实现其他的
-        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.PROTOBUF.getCode())));
+//        pipeline.addLast(new CommonEncoder(ISerializer.getSerializerByCode(ISerializer.SerializerType.PROTOBUF.getCode())));
+        pipeline.addLast(new CommonEncoder(ISerializer.getSerializer(ISerializer.SerializerType.valueOf(serializerTypeName))));
 //        pipeline.addLast(new CommonEncode(SerializerSpiLoader.getInstance(serializer)));
 
         pipeline.addLast(new NettyClientHandler());

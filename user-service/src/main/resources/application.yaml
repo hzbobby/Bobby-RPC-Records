@@ -14,7 +14,7 @@ brpc:
       max-retries: 3
   netty:
     port: 9002
-    serializer: json
+    serializer: protostuff
 
 logging:
   level:

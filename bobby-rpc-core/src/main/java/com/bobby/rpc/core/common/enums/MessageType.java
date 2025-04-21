@@ -10,6 +10,15 @@ public enum MessageType {
         this.code = code;
     }
 
+    public static MessageType fromCode(int messageType) {
+        for (MessageType type : MessageType.values()) {
+            if (type.code == messageType) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     public short getCode() {
         return code;
     }

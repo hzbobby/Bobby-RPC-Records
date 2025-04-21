@@ -1,6 +1,8 @@
 package com.bobby.rpc.core.common.codec.serializer;
 
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +11,6 @@ import java.util.Map;
  * @email: vividbobby@163.com
  * @date: 2025/3/28
  */
-
 public interface ISerializer {
     // 把对象序列化成字节数组
     byte[] serialize(Object obj);
@@ -29,8 +30,8 @@ public interface ISerializer {
 
     // 根据序号取出序列化器，暂时有两种实现方式，需要其它方式，实现这个接口即可
     static ISerializer getSerializerByCode(int code) {
-        ISerializer iSerializer = serializerMap.get(code);
-        if (iSerializer == null) {
+        ISerializer serializer = serializerMap.get(code);
+        if (serializer == null) {
             // 尝试创建
             if (code == SerializerType.JDK.getCode()) {
                 serializerMap.put(code, new ObjectSerializer());
@@ -38,15 +39,41 @@ public interface ISerializer {
                 serializerMap.put(code, new JacksonSerializer());
             } else if (code == SerializerType.KRYO.getCode()) {
                 serializerMap.put(code, new KryoSerializer());
-            }else if (code == SerializerType.PROTOBUF.getCode()) {
+            } else if (code == SerializerType.PROTOBUF.getCode()) {
                 serializerMap.put(code, new ProtobufSerializer());
+            } else if (code == SerializerType.PROTOSTUFF.getCode()) {
+                serializerMap.put(code, new ProtostuffSerializer());
             }
-            iSerializer = serializerMap.get(code);
-            if (iSerializer == null) {
+            serializer = serializerMap.get(code);
+            if (serializer == null) {
                 throw new RuntimeException("No serializer registered for code " + code);
             }
         }
-        return iSerializer;
+        return serializer;
+    }
+
+    static ISerializer getSerializer(SerializerType type) {
+        ISerializer serializer = serializerMap.get(type.getCode());
+        if (serializer == null) {
+            // 尝试创建
+            if (type.equals(SerializerType.JDK)) {
+                serializerMap.put(type.getCode(), new ObjectSerializer());
+            } else if (type.equals(SerializerType.JSON)) {
+                serializerMap.put(type.getCode(), new JacksonSerializer());
+            } else if (type.equals(SerializerType.KRYO)) {
+                serializerMap.put(type.getCode(), new KryoSerializer());
+            } else if (type.equals(SerializerType.PROTOBUF)) {
+                serializerMap.put(type.getCode(), new ProtobufSerializer());
+            } else if (type.equals(SerializerType.PROTOSTUFF)) {
+                serializerMap.put(type.getCode(), new ProtostuffSerializer());
+            }
+            serializer = serializerMap.get(type.getCode());
+            if (serializer == null) {
+                throw new RuntimeException("No serializer registered for code " + type.getCode());
+            }
+
+        }
+        return serializer;
     }
 
     static void registerSerializer(int code, ISerializer serializer) {
@@ -69,7 +96,8 @@ public interface ISerializer {
         JDK(0),
         JSON(1),
         KRYO(2),
-        PROTOBUF(3);
+        PROTOBUF(3),
+        PROTOSTUFF(4);
 
         private final int code;
 

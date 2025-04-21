@@ -99,8 +99,9 @@ public class BRpcAutoConfiguration {
     @Role(ROLE_INFRASTRUCTURE)
     public IRpcServer rpcServer(ServiceProvider serviceProvider) {
         log.info("Create bean of IRpcServer rpcServer");
+        log.debug("RpcServer Serializer: {}", brpcProperties.getNetty().getSerializer());
 
-        NettyRpcServer nettyRpcServer = new NettyRpcServer(serviceProvider);
+        NettyRpcServer nettyRpcServer = new NettyRpcServer(serviceProvider, brpcProperties.getNetty().getSerializer());
         nettyRpcServer.start(brpcProperties.getNetty().getPort());
         return nettyRpcServer;
     }
@@ -135,8 +136,8 @@ public class BRpcAutoConfiguration {
     @Role(ROLE_INFRASTRUCTURE)
     public IRpcClient rpcClient(IServiceDiscover serviceDiscover) {
         log.info("Create bean of IRpcClient rpcClient");
-
-        return new NettyRpcClient(serviceDiscover);
+        log.debug("RpcClient Serializer: {}", brpcProperties.getNetty().getSerializer());
+        return new NettyRpcClient(serviceDiscover, brpcProperties.getNetty().getSerializer());
     }
 
     @Bean

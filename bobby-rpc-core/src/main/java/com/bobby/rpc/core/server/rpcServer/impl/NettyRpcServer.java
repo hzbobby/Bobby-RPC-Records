@@ -15,11 +15,13 @@ public class NettyRpcServer implements IRpcServer {
     private final NettyServerInitializer nettyServerInitializer;
     private ChannelFuture channelFuture;
 
-    public NettyRpcServer(ServiceProvider serviceProvider) {
+    public NettyRpcServer(ServiceProvider serviceProvider, String serializerTypeName) {
         this.serviceProvider = serviceProvider;
         // 通过注入的方式可以实现多种不同初始化方式的 Netty
-        this.nettyServerInitializer = new NettyServerInitializer(serviceProvider);
+        this.nettyServerInitializer = new NettyServerInitializer(serviceProvider, serializerTypeName);
     }
+
+
 
     @Override
     public void start(int port) {
