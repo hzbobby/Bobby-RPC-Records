@@ -49,6 +49,7 @@ public class JacksonSerializer implements ISerializer {
         }
     }
 
+
     private Object handleRequest(byte[] bytes) {
         // 序列化反序列化后，类型擦除了
         RpcRequest request = null;

@@ -19,6 +19,8 @@ public interface ISerializer {
     // 其它方式需指定消息格式，再根据message转化成相应的对象
     Object deserialize(byte[] bytes, int messageType);
 
+//    Object deserialize(byte[] bytes, Class<?> clazz);
+
     // 返回使用的序列器，是哪个
     // 0：java自带序列化方式, 1: json序列化方式
     int getType();

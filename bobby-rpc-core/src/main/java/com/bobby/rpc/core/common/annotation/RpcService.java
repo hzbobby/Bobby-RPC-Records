@@ -14,6 +14,7 @@ import java.lang.annotation.*;
 public @interface RpcService {
     /**
      * 服务接口类
+     *
      * @return 接口Class对象
      */
     Class<?> interfaceClass() default void.class;
@@ -21,4 +22,6 @@ public @interface RpcService {
     boolean retryable() default false;
 
     String version() default "0.01";
+
+    int weight() default 0; // 权重
 }

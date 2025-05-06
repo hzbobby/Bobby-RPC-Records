@@ -1,7 +1,9 @@
 package com.bobby.rpc.core.server.register.impl;
 
 
+import com.bobby.rpc.core.common.ServiceMetadata;
 import com.bobby.rpc.core.server.register.IServiceRegister;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
@@ -21,7 +23,7 @@ public class ZkServiceRegister implements IServiceRegister {
 
     private void startClient() {
         log.info("Starting client");
-        if(!client.getState().equals(CuratorFrameworkState.STARTED)){
+        if (!client.getState().equals(CuratorFrameworkState.STARTED)) {
             client.start();
         }
         try {
@@ -69,6 +71,63 @@ public class ZkServiceRegister implements IServiceRegister {
                 client.create()
                         .withMode(CreateMode.EPHEMERAL)
                         .forPath(addressPath);
+                log.info("服务实例注册成功: {} -> {}", servicePath, serverAddress);
+            } catch (Exception e) {
+                // 节点已存在说明该实例正常在线，记录调试日志即可
+                log.debug("服务实例已存在（正常心跳）: {}", addressPath);
+            }
+
+            // v8. 创建 Retry 节点
+            if (retryable) {
+                if (client.checkExists().forPath(String.format("/%s/%s", "RETRY", serviceName)) == null) {
+                    log.info("注册可重试服务: {} -> {}", servicePath, serverAddress);
+                    client.create().creatingParentsIfNeeded()
+                            .withMode(CreateMode.EPHEMERAL)
+                            .forPath(String.format("/%s/%s", "RETRY", serviceName));
+                } else {
+                    log.info("重试服务已存在: {} -> {}", servicePath, serverAddress);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("服务注册失败: {}", servicePath, e);
+            throw new RuntimeException("Failed to register service: " + servicePath, e);
+        }
+    }
+
+    @Override
+    public void registerWithMetadata(String serviceName, InetSocketAddress serverAddress, ServiceMetadata metadata) {
+        if (serviceName == null || serverAddress == null) {
+            throw new IllegalArgumentException("Service name and server address cannot be null");
+        }
+        if (metadata == null) {
+            throw new IllegalArgumentException("ServiceMetadata cannot be null");
+        }
+        // 我们将 metadata 序列化为 bytes[] 然后一起存到 zk 上面
+        boolean retryable = metadata.isRetryable();
+        byte[] byteMetadata = null;
+        try {
+            byteMetadata = ServiceMetadata.serialize(metadata);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        String servicePath = getServicePath(serviceName);
+
+        try {
+            // 1. 创建持久化父节点（幂等操作） -- 一般是服务的分类，例如一个服务名
+            if (client.checkExists().forPath(servicePath) == null) {
+                client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.PERSISTENT)
+                        .forPath(servicePath);
+            }
+
+            // 2. 注册临时节点（允许重复创建，实际会覆盖）-- 一般是具体的实例，服务名下，不同的实例
+            String addressPath = getInstancePath(serviceName, getServiceAddress(serverAddress));
+            try {
+                client.create()
+                        .withMode(CreateMode.EPHEMERAL)
+                        .forPath(addressPath, byteMetadata);
                 log.info("服务实例注册成功: {} -> {}", servicePath, serverAddress);
             } catch (Exception e) {
                 // 节点已存在说明该实例正常在线，记录调试日志即可

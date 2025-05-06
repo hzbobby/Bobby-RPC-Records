@@ -1,5 +1,7 @@
 package com.bobby.rpc.core.server.provider;
 
+import com.bobby.rpc.core.common.ServiceMetadata;
+import com.bobby.rpc.core.common.annotation.RpcService;
 import com.bobby.rpc.core.server.ratelimit.provider.RateLimitProvider;
 import com.bobby.rpc.core.server.register.IServiceRegister;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,18 @@ public class ServiceProvider {
             interfaceProvider.put(i.getName(), service);
             // 在注册中心注册服务
             serviceRegister.register(i.getName(), socketAddress, retryable);
+        }
+    }
+
+    public void provideServiceInterface(Object service, RpcService rpcService) {
+        Class<?>[] interfaces = service.getClass().getInterfaces();
+        // 一个类可能实现多个服务接口
+        for (Class<?> i : interfaces) {
+            // 本机的映射表
+            interfaceProvider.put(i.getName(), service);
+            ServiceMetadata serviceMetadata = ServiceMetadata.fromRpcService(rpcService);
+            // 在注册中心注册服务
+            serviceRegister.registerWithMetadata(i.getName(), socketAddress, serviceMetadata);
         }
     }
 

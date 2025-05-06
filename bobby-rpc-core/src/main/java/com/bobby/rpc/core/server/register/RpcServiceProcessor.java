@@ -32,7 +32,7 @@ public class RpcServiceProcessor implements BeanPostProcessor {
 //        }
 //        String serviceName = interfaceClass.getName();
 //         获取本应用的 host & port
-        serviceProvider.provideServiceInterface(bean, rpcService.retryable());
+        serviceProvider.provideServiceInterface(bean, rpcService);
     }
 
 }
