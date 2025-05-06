@@ -9,6 +9,8 @@ import com.bobby.rpc.core.client.rpcClient.IRpcClient;
 import com.bobby.rpc.core.client.rpcClient.impl.NettyRpcClient;
 import com.bobby.rpc.core.common.loadbalance.ILoadBalance;
 import com.bobby.rpc.core.common.loadbalance.RoundLoadBalance;
+import com.bobby.rpc.core.common.loadbalance.WeightRoundRobinLoadBalance;
+import com.bobby.rpc.core.common.resolver.RpcWeightResolver;
 import com.bobby.rpc.core.server.provider.ServiceProvider;
 import com.bobby.rpc.core.server.ratelimit.provider.RateLimitProvider;
 import com.bobby.rpc.core.server.register.IServiceRegister;
@@ -25,6 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
+import org.springframework.core.env.Environment;
 
 import java.net.InetSocketAddress;
 
@@ -112,8 +115,8 @@ public class BRpcAutoConfiguration {
     @Role(ROLE_INFRASTRUCTURE)
     public ILoadBalance loadBalance() {
         log.info("Create bean of ILoadBalance loadBalance");
-
-        return new RoundLoadBalance();
+        WeightRoundRobinLoadBalance weightRoundRobinLoadBalance = new WeightRoundRobinLoadBalance();
+        return weightRoundRobinLoadBalance;
     }
 
     @Bean
@@ -148,6 +151,11 @@ public class BRpcAutoConfiguration {
         return new ClientProxy(rpcClient, circuitBreakerProvider, serviceDiscover);
     }
 
+
+    @Bean
+    public RpcWeightResolver rpcWeightResolver(Environment environment) {
+        return new RpcWeightResolver(environment);
+    }
 
     // 注解驱动
     @Bean

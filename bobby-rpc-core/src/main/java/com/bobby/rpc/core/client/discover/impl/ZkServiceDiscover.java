@@ -43,11 +43,11 @@ public class ZkServiceDiscover implements IServiceDiscover {
         // 监控整个根路径反而会带来较大的性能开销
     }
 
-    private String getServicePath(String serviceName) {
+    private static String getServicePath(String serviceName) {
         return String.format("/%s", serviceName);
     }
 
-    private String getInstancePath(String serviceName, String addressName) {
+    private static String getInstancePath(String serviceName, String addressName) {
         return String.format("/%s/%s", serviceName, addressName);
     }
 
@@ -110,16 +110,18 @@ public class ZkServiceDiscover implements IServiceDiscover {
             if (instances == null || instances.isEmpty()) {
                 List<String> instancePathList = client.getChildren().forPath(servicePath);
                 // 每个 instances 都有一个 ServiceMetaData
-                Map<String, ServiceMetadata> metadataMap = new HashMap<>();
-                for (String path : instancePathList) {
-                    ServiceMetadata metadata = ServiceMetadata.deserialize(client.getData().forPath(path));
-                    metadataMap.put(path, metadata);
+                instances = new HashMap<>();
+                for (String address : instancePathList) {
+                    String instancePath = getInstancePath(serviceName, address);
+                    byte[] bytes = client.getData().forPath(instancePath);
+                    ServiceMetadata metadata = ServiceMetadata.deserialize(bytes);
+                    instances.put(address, metadata);
                 }
 
                 // 缓存 key 是 appName + serviceName
 //                serviceCache.put(servicePath, instances);
 //                serviceCache.addServiceList(servicePath, instances);
-                serviceCache.addServices(servicePath, metadataMap); // 添加一个元数据进去
+                serviceCache.addServices(servicePath, instances); // 添加一个元数据进去
 
                 // v6
                 // 因此我们在服务发现的时候，动态的进行监控
@@ -134,8 +136,8 @@ public class ZkServiceDiscover implements IServiceDiscover {
                 return null;
             }
             // 未进行负载均衡，选择第一个
-            String selectedInstance = loadBalance.balanceWithMetadata(instances);
-
+            String selectedInstance = loadBalance.balanceWithMetadata(instances, servicePath);
+            log.info("选择服务: {}", selectedInstance);
             return parseAddress(selectedInstance);
         } catch (Exception e) {
             log.error("服务发现失败: {}", servicePath, e);

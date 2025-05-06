@@ -4,9 +4,10 @@ package com.bobby.blog.service.impl;
 import com.bobby.rpc.core.common.annotation.RpcService;
 import com.bobby.rpc.core.sample.domain.Blog;
 import com.bobby.rpc.core.sample.service.IBlogService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-@RpcService
+@RpcService(weight = 2)
 @Service
 public class BlogServiceImpl implements IBlogService {
     @Override

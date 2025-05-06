@@ -41,13 +41,12 @@ public class ServiceProvider {
         }
     }
 
-    public void provideServiceInterface(Object service, RpcService rpcService) {
+    public void provideServiceInterface(Object service, ServiceMetadata serviceMetadata) {
         Class<?>[] interfaces = service.getClass().getInterfaces();
         // 一个类可能实现多个服务接口
         for (Class<?> i : interfaces) {
             // 本机的映射表
             interfaceProvider.put(i.getName(), service);
-            ServiceMetadata serviceMetadata = ServiceMetadata.fromRpcService(rpcService);
             // 在注册中心注册服务
             serviceRegister.registerWithMetadata(i.getName(), socketAddress, serviceMetadata);
         }

@@ -1,6 +1,8 @@
 package com.bobby.rpc.core.server.register;
 
+import com.bobby.rpc.core.common.ServiceMetadata;
 import com.bobby.rpc.core.common.annotation.RpcService;
+import com.bobby.rpc.core.common.resolver.RpcWeightResolver;
 import com.bobby.rpc.core.server.provider.ServiceProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -32,7 +34,13 @@ public class RpcServiceProcessor implements BeanPostProcessor {
 //        }
 //        String serviceName = interfaceClass.getName();
 //         获取本应用的 host & port
-        serviceProvider.provideServiceInterface(bean, rpcService);
+        // 进行属性解析
+//        int w = rpcWeightResolver.resolveWeight(rpcService.weight());
+        ServiceMetadata serviceMetadata = new ServiceMetadata();
+        serviceMetadata.setWeight(rpcService.weight());
+        serviceMetadata.setRetryable(rpcService.retryable());
+        log.info("服务元数据: {}", serviceMetadata);
+        serviceProvider.provideServiceInterface(bean, serviceMetadata);
     }
 
 }

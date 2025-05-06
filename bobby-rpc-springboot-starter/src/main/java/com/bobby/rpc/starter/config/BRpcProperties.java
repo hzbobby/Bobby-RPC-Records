@@ -4,6 +4,9 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author: Bobby
  * @email: vividbobby@163.com
@@ -18,9 +21,26 @@ public class BRpcProperties {
     private NettyProperties netty;
     private ZkProperties zk;
 
+    // 用于定义各个服务的一些参数，这里只定义了一个 weight
+    private Map<String, ServiceConfig> services = new HashMap<>();
+
+    // 嵌套配置类
+    public static class ServiceConfig {
+        private int weight;
+
+        // getter和setter
+        public int getWeight() {
+            return weight;
+        }
+
+        public void setWeight(int weight) {
+            this.weight = weight;
+        }
+    }
+
     @Data
     @Builder
-    public static class NettyProperties{
+    public static class NettyProperties {
         private int port;
         private String serializer;
     }

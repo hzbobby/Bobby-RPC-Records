@@ -1,13 +1,16 @@
 package com.bobby.rpc.core.client.discover.watcher;
 
 import com.bobby.rpc.core.client.cache.ServiceCache;
+import com.bobby.rpc.core.common.ServiceMetadata;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class ZkWatcher {
@@ -46,7 +49,7 @@ public class ZkWatcher {
         log.info("已创建服务监听");
     }
 
-    private String parseServiceName(ChildData childData){
+    private String parseServiceName(ChildData childData) {
         String s = new String(childData.getData());
         return s;
     }
@@ -73,15 +76,34 @@ public class ZkWatcher {
         log.debug("服务节点已下线: {}", childData.getPath());
     }
 
-    // 更新本地缓存
+//    // 更新本地缓存
+//    private void updateServiceCache(String servicePath) {
+//        try {
+//            List<String> instances = client.getChildren().forPath(servicePath);
+//            cache.addServiceList(servicePath, instances);
+//        } catch (Exception e) {
+//            log.error("服务节点缓存更新失败: {}", servicePath, e);
+//        }
+//    }
+
+    // 更新本地缓存,带有元数据
     private void updateServiceCache(String servicePath) {
         try {
             List<String> instances = client.getChildren().forPath(servicePath);
-            cache.addServiceList(servicePath, instances);
+            Map<String, ServiceMetadata> map = new HashMap<>();
+            for (String address : instances) {
+                String instancePath = servicePath + "/" + address;
+                byte[] bytes = client.getData().forPath(instancePath);
+                ServiceMetadata deserialize = ServiceMetadata.deserialize(bytes);
+                map.put(address, deserialize);
+            }
+//            cache.addServiceList(servicePath, instances);
+            cache.addServices(servicePath, map);
         } catch (Exception e) {
             log.error("服务节点缓存更新失败: {}", servicePath, e);
         }
     }
+
 
     // 判断是否为直接子节点（避免孙子节点干扰）
     public boolean isDirectChild(String fullPath, String parentPath) {
