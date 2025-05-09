@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * p.s: 为了防止内存泄露，dubbo 里面多维护了 lastUpdateTime, 当超过一定时间 60s 没有被轮循到，会删除该实例
  */
-public class WeightRoundRobinLoadBalance implements ILoadBalance {
+public class WeightRoundRobinLoadBalance extends AbstractMetadataLoadBalance {
 
     private static final long RECYCLE_TIME = 60000L; // 60s
 
@@ -52,11 +52,6 @@ public class WeightRoundRobinLoadBalance implements ILoadBalance {
     }
 
     private final ConcurrentMap<String, ConcurrentMap<String, WeightedNode>> nodeMap = new ConcurrentHashMap<>();
-
-    @Override
-    public String balance(List<String> addressList) {
-        throw new RuntimeException("Not Implement.");
-    }
 
     @Override
     public String balanceWithMetadata(Map<String, ServiceMetadata> instances, String servicePath) {

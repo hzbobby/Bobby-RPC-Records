@@ -1,5 +1,6 @@
 package com.bobby.rpc.core.common.loadbalance;
 
+import com.bobby.rpc.core.common.RpcRequest;
 import com.bobby.rpc.core.common.ServiceMetadata;
 
 import java.util.List;
@@ -12,4 +13,7 @@ public interface ILoadBalance {
     String balance(List<String> addressList);
 
     String balanceWithMetadata(Map<String, ServiceMetadata> instances, String servicePath);
+
+    String balanceWithRequest(Map<String, ServiceMetadata> instances, RpcRequest rpcRequest);
+
 }

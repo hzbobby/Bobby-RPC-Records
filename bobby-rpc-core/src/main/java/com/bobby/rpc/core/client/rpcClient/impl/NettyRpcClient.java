@@ -51,7 +51,7 @@ public class NettyRpcClient implements IRpcClient {
     @Override
     public RpcResponse sendRequest(RpcRequest request) {
 //        InetSocketAddress address = serviceDiscover.serviceDiscovery(request.getInterfaceName());
-        InetSocketAddress address = serviceDiscover.discoveryWithMetadata(request.getInterfaceName());
+        InetSocketAddress address = serviceDiscover.discovery(request);
         log.debug("RPC$远程服务地址: {}", address);
         if (address == null) {
             log.error("服务发现失败，返回的地址为 null");

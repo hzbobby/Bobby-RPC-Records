@@ -10,7 +10,7 @@ import java.util.Random;
 /**
  * 随机负载均衡
  */
-public class RandomLoadBalance implements ILoadBalance {
+public class RandomLoadBalance extends AbstractLoadBalance {
     @Override
     public String balance(List<String> addressList) {
         Random random = new
@@ -20,8 +20,4 @@ public class RandomLoadBalance implements ILoadBalance {
         return addressList.get(choose);
     }
 
-    @Override
-    public String balanceWithMetadata(Map<String, ServiceMetadata> instances, String servicePath) {
-        throw new RuntimeException("Not Implement.");
-    }
 }

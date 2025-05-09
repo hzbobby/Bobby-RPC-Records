@@ -4,6 +4,7 @@ package com.bobby.rpc.core.client.discover.impl;
 import com.bobby.rpc.core.client.cache.ServiceCache;
 import com.bobby.rpc.core.client.discover.IServiceDiscover;
 import com.bobby.rpc.core.client.discover.watcher.ZkWatcher;
+import com.bobby.rpc.core.common.RpcRequest;
 import com.bobby.rpc.core.common.ServiceMetadata;
 import com.bobby.rpc.core.common.loadbalance.ILoadBalance;
 import lombok.extern.slf4j.Slf4j;
@@ -99,6 +100,55 @@ public class ZkServiceDiscover implements IServiceDiscover {
 
     @Override
     public InetSocketAddress discoveryWithMetadata(String serviceName) {
+        if (serviceName == null) {
+            throw new IllegalArgumentException("Service name cannot be null");
+        }
+        String servicePath = getServicePath(serviceName);
+        try {
+            // 优先从缓存获取
+            Map<String, ServiceMetadata> instances = serviceCache.getServices(servicePath);
+            // 没有获取到缓存，则从 zk 中读取
+            if (instances == null || instances.isEmpty()) {
+                List<String> instancePathList = client.getChildren().forPath(servicePath);
+                // 每个 instances 都有一个 ServiceMetaData
+                instances = new HashMap<>();
+                for (String address : instancePathList) {
+                    String instancePath = getInstancePath(serviceName, address);
+                    byte[] bytes = client.getData().forPath(instancePath);
+                    ServiceMetadata metadata = ServiceMetadata.deserialize(bytes);
+                    instances.put(address, metadata);
+                }
+
+                // 缓存 key 是 appName + serviceName
+//                serviceCache.put(servicePath, instances);
+//                serviceCache.addServiceList(servicePath, instances);
+                serviceCache.addServices(servicePath, instances); // 添加一个元数据进去
+
+                // v6
+                // 因此我们在服务发现的时候，动态的进行监控
+                // 如果缓存中没有，表示是第一次获取，那么我们就对这些服务实例进行监控
+                // 当这些服务实例发生变动时，就通知客户端
+                // 有了缓存机制，就不用显示的往缓存里添加，不然可能会添加两次
+                zkWatcher.watch(servicePath);
+            }
+
+            if (instances.isEmpty()) {
+                log.warn("未找到可用服务实例: {}", servicePath);
+                return null;
+            }
+            // 未进行负载均衡，选择第一个
+            String selectedInstance = loadBalance.balanceWithMetadata(instances, servicePath);
+            log.info("选择服务: {}", selectedInstance);
+            return parseAddress(selectedInstance);
+        } catch (Exception e) {
+            log.error("服务发现失败: {}", servicePath, e);
+            throw new RuntimeException("Failed to discover service: " + servicePath, e);
+        }
+    }
+
+    @Override
+    public InetSocketAddress discovery(RpcRequest rpcRequest) {
+        String serviceName = rpcRequest.getInterfaceName();
         if (serviceName == null) {
             throw new IllegalArgumentException("Service name cannot be null");
         }
